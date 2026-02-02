@@ -260,4 +260,3 @@ Bei Fragen oder Problemen:
 ---
 
 **Viel Erfolg mit deiner AutoMap PWA! 🚬🗺️**
-
