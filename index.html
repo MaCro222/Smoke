@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="description" content="Finde Zigarettenautomaten in deiner Nähe">
+    
+    <title>AutoMap - Zigarettenautomaten Finder</title>
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">
+                <span class="logo-icon">🚬</span>
+                <span class="logo-text">AutoMap</span>
+            </h1>
+            
+            <nav class="nav">
+                <button class="nav-btn" id="locateBtn" title="Mein Standort">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+                <button class="nav-btn" id="addBtn" title="Automat hinzufügen">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </button>
+                <button class="nav-btn" id="menuBtn" title="Menü">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat">
+            <span class="stat-value" id="validatedCount">0</span>
+            <span class="stat-label">Validiert</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="pendingCount">0</span>
+            <span class="stat-label">Ausstehend</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="userTagsCount">0</span>
+            <span class="stat-label">Meine Tags</span>
+        </div>
+    </div>
+
+    <!-- Add Modal -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Automat hinzufügen</h2>
+                <button class="close-btn" id="closeAddModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    Tippe auf die Karte, um einen Automaten zu markieren. 
+                    Nach 5 unabhängigen Bestätigungen wird er öffentlich sichtbar.
+                </p>
+                <div class="form-group">
+                    <label for="notes">Notizen (optional)</label>
+                    <textarea id="notes" rows="3" placeholder="z.B. 'Vor dem Supermarkt', 'Neben der Bushaltestelle'"></textarea>
+                </div>
+                <button class="btn btn-primary" id="confirmAddBtn">Auf Karte markieren</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Automaten-Details</h2>
+                <button class="close-btn" id="closeDetailModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="detailContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Modal -->
+    <div class="modal" id="menuModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Menü</h2>
+                <button class="close-btn" id="closeMenuModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="menu-section">
+                    <h3>Anzeige</h3>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="showUnvalidated">
+                        <span>Unvalidierte Automaten anzeigen</span>
+                    </label>
+                </div>
+                
+                <div class="menu-section">
+                    <h3>Admin</h3>
+                    <button class="btn btn-secondary" id="adminBtn">Admin-Panel</button>
+                </div>
+                
+                <div class="menu-section">
+                    <h3>Info</h3>
+                    <p class="info-text">
+                        <strong>Wie funktioniert's?</strong><br>
+                        Markiere Automaten auf der Karte. Nach 5 unabhängigen Bestätigungen 
+                        werden sie für alle sichtbar. So entsteht eine Community-basierte Karte!
+                    </p>
+                    <p class="info-text">
+                        <strong>Geräte-ID:</strong> <code id="deviceId">Wird geladen...</code>
+                    </p>
+                </div>
+                
+                <div class="menu-section">
+                    <h3>Daten</h3>
+                    <button class="btn btn-secondary" id="clearCacheBtn">Cache leeren</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Admin-Panel</h2>
+                <button class="close-btn" id="closeAdminModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-login" id="adminLogin">
+                    <input type="password" id="adminPassword" placeholder="Admin-Passwort">
+                    <button class="btn btn-primary" id="adminLoginBtn">Anmelden</button>
+                </div>
+                <div class="admin-content" id="adminContent" style="display: none;">
+                    <h3>Unvalidierte Automaten</h3>
+                    <div id="adminList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="storage.js"></script>
+    <script src="map.js"></script>
+    <script src="app.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('Service Worker registriert:', reg))
+                    .catch(err => console.log('Service Worker Fehler:', err));
+            });
+        }
+    </script>
+</body>
+</html>
