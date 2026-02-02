@@ -37,7 +37,7 @@ const CONFIG = {
         maxZoom: 18,
         minZoom: 10,
         // Default center (will be replaced by user location)
-        defaultCenter: [50.2333, 8.9167], // Bad Orb, Germany
+        defaultCenter: [47.718915651114905, 8.892817096270281], // Bohlingen, Germany
         tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     },
