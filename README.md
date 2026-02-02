@@ -1,4 +1,4 @@
-# AutoMap - Zigarettenautomaten Finder PWA
+# SMOKE - Zigarettenautomaten Finder PWA
 
 Eine Progressive Web App zum Finden und Teilen von Zigarettenautomaten-Standorten. Community-basiert mit einem Validierungssystem ähnlich wie bei Flush oder Ooono.
 
