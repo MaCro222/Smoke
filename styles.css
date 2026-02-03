@@ -119,10 +119,38 @@ body {
     right: 0;
     bottom: 80px;
     z-index: 1;
+    touch-action: none; /* Wichtig für Mobile Touch-Events */
 }
 
 .leaflet-container {
     background: #0a0a0a;
+    cursor: grab;
+    -webkit-tap-highlight-color: transparent; /* iOS tap highlight entfernen */
+}
+
+.leaflet-container:active {
+    cursor: grabbing;
+}
+
+/* Mobile Touch-Optimierung */
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Leaflet Controls z-index Fix */
+.leaflet-control-container {
+    position: relative;
+    z-index: 10;
+}
+
+.leaflet-popup {
+    z-index: 1100 !important;
+}
+
+.leaflet-popup-pane {
+    z-index: 1100 !important;
 }
 
 /* Custom Marker Styles */
@@ -139,10 +167,21 @@ body {
     box-shadow: var(--shadow-md);
     cursor: pointer;
     transition: var(--transition);
+    pointer-events: auto !important; /* Wichtig für Touch */
+    -webkit-tap-highlight-color: rgba(255, 107, 53, 0.3);
 }
 
-.custom-marker:hover {
+.custom-marker:hover,
+.custom-marker:active {
     transform: rotate(-45deg) scale(1.15);
+}
+
+/* Mobile: Größere Touch-Area */
+@media (max-width: 768px) {
+    .custom-marker {
+        width: 44px;
+        height: 44px;
+    }
 }
 
 .custom-marker-inner {

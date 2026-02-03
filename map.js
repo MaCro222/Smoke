@@ -147,9 +147,19 @@ class MapManager {
             iconAnchor: [20, 40]
         });
 
-        const marker = L.marker([machine.lat, machine.lng], { icon })
+        const marker = L.marker([machine.lat, machine.lng], { 
+            icon,
+            interactive: true, // Wichtig für Mobile
+            bubblingMouseEvents: false
+        })
             .addTo(this.map)
-            .on('click', () => this.showMachineDetail(machine));
+            .on('click', () => this.showMachineDetail(machine))
+            .on('touchstart', (e) => {
+                // Android Touch-Fix
+                e.originalEvent.preventDefault();
+                e.originalEvent.stopPropagation();
+                this.showMachineDetail(machine);
+            });
 
         this.markers[machine.id] = marker;
     }

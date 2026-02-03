@@ -157,6 +157,7 @@ function hideLoading() {
 
 /**
  * Request user location
+ * iOS/Safari optimized with better error handling
  */
 function getUserLocation() {
     return new Promise((resolve, reject) => {
@@ -165,31 +166,62 @@ function getUserLocation() {
             return;
         }
         
-        navigator.geolocation.getCurrentPosition(
-            position => {
-                resolve({
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                    accuracy: position.coords.accuracy
-                });
-            },
-            error => {
-                let message = 'Standort konnte nicht ermittelt werden';
-                switch (error.code) {
-                    case error.PERMISSION_DENIED:
-                        message = 'Standortzugriff wurde verweigert';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        message = 'Standort nicht verfügbar';
-                        break;
-                    case error.TIMEOUT:
-                        message = 'Standortabfrage hat zu lange gedauert';
-                        break;
-                }
-                reject(new Error(message));
-            },
-            CONFIG.geolocationOptions
-        );
+        // iOS-optimierte Optionen
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 15000, // iOS braucht manchmal länger
+            maximumAge: 0
+        };
+        
+        // Fallback für iOS: Erst mit hoher Genauigkeit, dann mit niedriger
+        let highAccuracyTried = false;
+        
+        const tryGetLocation = (useHighAccuracy) => {
+            const opts = { ...options, enableHighAccuracy: useHighAccuracy };
+            
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    resolve({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    });
+                },
+                error => {
+                    // iOS Fallback: Bei Timeout mit niedriger Genauigkeit versuchen
+                    if (!highAccuracyTried && useHighAccuracy && error.code === error.TIMEOUT) {
+                        console.log('High accuracy timeout, trying low accuracy...');
+                        highAccuracyTried = true;
+                        tryGetLocation(false);
+                        return;
+                    }
+                    
+                    let message = 'Standort konnte nicht ermittelt werden';
+                    let hint = '';
+                    
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            message = 'Standortzugriff verweigert';
+                            hint = '\n\niOS: Einstellungen → Safari → Standort → "Beim Verwenden erlauben"';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message = 'Standort nicht verfügbar';
+                            hint = '\n\nPrüfe ob Ortungsdienste aktiviert sind';
+                            break;
+                        case error.TIMEOUT:
+                            message = 'Standortabfrage Timeout';
+                            hint = '\n\nVersuche es erneut oder gehe nach draußen für besseren GPS-Empfang';
+                            break;
+                    }
+                    
+                    reject(new Error(message + hint));
+                },
+                opts
+            );
+        };
+        
+        // Starte mit hoher Genauigkeit
+        tryGetLocation(true);
     });
 }
 
