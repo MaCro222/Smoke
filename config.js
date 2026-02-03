@@ -1,12 +1,12 @@
 // Firebase Configuration
 // TODO: Replace with your actual Firebase config
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyAgl5BHPfoR8LezXF2gz1evehqaqiCnL0k",
+    authDomain: "smoke-85e3b.firebaseapp.com",
+    projectId: "smoke-85e3b",
+    storageBucket: "smoke-85e3b.firebasestorage.app",
+    messagingSenderId: "768256931745",
+    appId: "1:768256931745:web:2728b27586cb1ec96ffde0"
 };
 
 // Admin Password Hash (SHA-256)
