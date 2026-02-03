@@ -46,15 +46,22 @@ class MapManager {
         // Load and display machines
         this.refreshMarkers();
 
-        // Set up map click handler (Desktop & Android)
-        this.map.on('click', (e) => this.handleMapClick(e));
-        
-        // iOS-spezifischer Tap-Handler
-        if (L.Browser.mobile && L.Browser.safari) {
-            this.map.on('tap', (e) => this.handleMapClick(e));
-        }
+        // Set up standard map events
+        this.bindStandardMapEvents();
 
         console.log('Map initialized');
+    }
+
+    /**
+     * Bind standard map events (non-adding mode)
+     */
+    bindStandardMapEvents() {
+        // Entferne alle vorherigen Handler
+        this.map.off('click');
+        this.map.off('tap');
+        
+        // Keine Events im Standard-Modus - nur im Adding-Modus
+        console.log('Standard map events bound (no click handling)');
     }
 
     /**
@@ -299,48 +306,95 @@ class MapManager {
      * Handle map click
      */
     handleMapClick(e) {
-        if (!this.addingMode) return;
-
-        // Remove previous temp marker
-        if (this.tempMarker) {
-            this.map.removeLayer(this.tempMarker);
+        console.log('🗺️ handleMapClick called!');
+        console.log('  - addingMode:', this.addingMode);
+        console.log('  - event:', e);
+        console.log('  - coordinates:', e.latlng);
+        
+        if (!this.addingMode) {
+            console.log('  ⚠️ Not in adding mode, ignoring click');
+            return;
         }
 
-        // Add temporary marker
-        const icon = L.divIcon({
-            className: 'custom-marker-wrapper',
-            html: `
-                <div class="custom-marker pending" style="animation: pulse 1s ease-in-out infinite;">
-                    <div class="custom-marker-inner">?</div>
-                </div>
-            `,
-            iconSize: [40, 40],
-            iconAnchor: [20, 40]
-        });
-
-        this.tempMarker = L.marker([e.latlng.lat, e.latlng.lng], { icon }).addTo(this.map);
+        // Get coordinates
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
         
-        // Store coordinates for later
-        this.tempCoords = { lat: e.latlng.lat, lng: e.latlng.lng };
+        console.log(`  ✅ Adding machine at: ${lat}, ${lng}`);
         
-        showToast('Automat markiert. Klicke auf "Bestätigen".', 'success');
+        // Store coordinates
+        this.tempCoords = { lat, lng };
+        
+        // Show confirmation with coordinates
+        const confirmAdd = confirm(`Automaten hier markieren?\n\nStandort: ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+        
+        if (confirmAdd) {
+            console.log('  ✅ User confirmed, adding machine...');
+            // Add the machine immediately
+            this.confirmAddMachine('');
+        } else {
+            console.log('  ❌ User cancelled');
+            // Just cancel
+            this.cancelAddingMode();
+        }
     }
 
     /**
      * Start adding mode
      */
     startAddingMode() {
+        console.log('🎯 Starting adding mode...');
         this.addingMode = true;
-        this.map.getContainer().style.cursor = 'crosshair';
-        showToast('Klicke auf die Karte, um einen Automaten zu markieren', 'info', 5000);
+        
+        // Visual feedback
+        const mapContainer = this.map.getContainer();
+        mapContainer.style.cursor = 'crosshair';
+        mapContainer.style.border = '4px solid #ff6b35'; // Orange border
+        mapContainer.style.boxShadow = '0 0 20px rgba(255, 107, 53, 0.5)';
+        
+        // Entferne alte Handler und binde neu (iOS/Android Fix)
+        this.map.off('click');
+        this.map.off('tap');
+        
+        // Bind Click Handler
+        this.clickHandler = (e) => {
+            console.log('🗺️ Map clicked at:', e.latlng);
+            this.handleMapClick(e);
+        };
+        
+        this.map.on('click', this.clickHandler);
+        
+        // iOS/Mobile: Auch tap-Event
+        if (L.Browser.mobile) {
+            console.log('📱 Mobile detected, binding tap event');
+            this.map.on('tap', this.clickHandler);
+        }
+        
+        showToast('🎯 Tippe auf die Karte!', 'info', 5000);
     }
 
     /**
      * Cancel adding mode
      */
     cancelAddingMode() {
+        console.log('🚫 Cancelling adding mode...');
         this.addingMode = false;
-        this.map.getContainer().style.cursor = '';
+        
+        // Remove visual feedback
+        const mapContainer = this.map.getContainer();
+        mapContainer.style.cursor = '';
+        mapContainer.style.border = '';
+        mapContainer.style.boxShadow = '';
+        
+        // Entferne Adding-Handler
+        if (this.clickHandler) {
+            this.map.off('click', this.clickHandler);
+            this.map.off('tap', this.clickHandler);
+            this.clickHandler = null;
+        }
+        
+        // Binde Standard-Handler wieder (für normale Nutzung)
+        this.bindStandardMapEvents();
         
         if (this.tempMarker) {
             this.map.removeLayer(this.tempMarker);
