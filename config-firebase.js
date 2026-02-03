@@ -2,12 +2,12 @@
 // Siehe Schritt 3 im Setup-Guide
 
 const firebaseConfig = {
-    apiKey: "DEIN_API_KEY_HIER",
-    authDomain: "dein-projekt.firebaseapp.com",
-    projectId: "dein-projekt-id",
-    storageBucket: "dein-projekt.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abc123"
+    apiKey: "AIzaSyAgl5BHPfoR8LezXF2gz1evehqaqiCnL0k",
+  authDomain: "smoke-85e3b.firebaseapp.com",
+  projectId: "smoke-85e3b",
+  storageBucket: "smoke-85e3b.firebasestorage.app",
+  messagingSenderId: "768256931745",
+  appId: "1:768256931745:web:2728b27586cb1ec96ffde0",
 };
 
 // Admin Password Hash (SHA-256)
