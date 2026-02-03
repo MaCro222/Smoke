@@ -119,17 +119,26 @@ body {
     right: 0;
     bottom: 80px;
     z-index: 1;
-    touch-action: none; /* Wichtig für Mobile Touch-Events */
+    touch-action: pan-x pan-y; /* Erlaubt Pan/Zoom, verhindert nur Browser-Gesten */
 }
 
 .leaflet-container {
     background: #0a0a0a;
     cursor: grab;
     -webkit-tap-highlight-color: transparent; /* iOS tap highlight entfernen */
+    -webkit-user-select: none; /* Verhindert Text-Selektion beim Tippen */
+    -webkit-touch-callout: none; /* Verhindert iOS Kontext-Menü */
 }
 
 .leaflet-container:active {
     cursor: grabbing;
+}
+
+/* iOS Safari spezifische Fixes */
+@supports (-webkit-touch-callout: none) {
+    .leaflet-container {
+        touch-action: pan-x pan-y pinch-zoom;
+    }
 }
 
 /* Mobile Touch-Optimierung */
@@ -137,6 +146,12 @@ body {
 .leaflet-marker-shadow {
     pointer-events: auto !important;
     cursor: pointer !important;
+    -webkit-tap-highlight-color: rgba(255, 107, 53, 0.2);
+}
+
+/* Leaflet Interactive Layer - iOS Fix */
+.leaflet-interactive {
+    pointer-events: auto;
 }
 
 /* Leaflet Controls z-index Fix */

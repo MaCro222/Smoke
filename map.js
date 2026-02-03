@@ -46,8 +46,13 @@ class MapManager {
         // Load and display machines
         this.refreshMarkers();
 
-        // Set up map click handler
+        // Set up map click handler (Desktop & Android)
         this.map.on('click', (e) => this.handleMapClick(e));
+        
+        // iOS-spezifischer Tap-Handler
+        if (L.Browser.mobile && L.Browser.safari) {
+            this.map.on('tap', (e) => this.handleMapClick(e));
+        }
 
         console.log('Map initialized');
     }
@@ -149,17 +154,27 @@ class MapManager {
 
         const marker = L.marker([machine.lat, machine.lng], { 
             icon,
-            interactive: true, // Wichtig für Mobile
+            interactive: true,
             bubblingMouseEvents: false
         })
-            .addTo(this.map)
-            .on('click', () => this.showMachineDetail(machine))
-            .on('touchstart', (e) => {
-                // Android Touch-Fix
+            .addTo(this.map);
+
+        // Event Handler für alle Plattformen
+        const showDetail = (e) => {
+            if (e && e.originalEvent) {
                 e.originalEvent.preventDefault();
                 e.originalEvent.stopPropagation();
-                this.showMachineDetail(machine);
-            });
+            }
+            this.showMachineDetail(machine);
+        };
+
+        // Click für Desktop/Android
+        marker.on('click', showDetail);
+        
+        // Tap für iOS (Leaflet-spezifisch)
+        if (L.Browser.mobile) {
+            marker.on('tap', showDetail);
+        }
 
         this.markers[machine.id] = marker;
     }
