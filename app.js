@@ -87,6 +87,18 @@ function setupEventListeners() {
     });
 
     document.getElementById('clearCacheBtn').addEventListener('click', clearCache);
+    
+    // Sync button
+    document.getElementById('syncNowBtn').addEventListener('click', () => {
+        if (CONFIG.useFirebase && storage.db) {
+            showToast('Synchronisiere...', 'info');
+            storage.syncWithFirebase()
+                .then(() => showToast('Sync erfolgreich!', 'success'))
+                .catch(() => showToast('Sync fehlgeschlagen', 'error'));
+        } else {
+            showToast('Firebase nicht aktiviert', 'warning');
+        }
+    });
 
     // Admin modal
     document.getElementById('closeAdminModal').addEventListener('click', closeAdminModal);
