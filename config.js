@@ -12,7 +12,7 @@ const firebaseConfig = {
 
 // Admin Password Hash (SHA-256)
 //  password: ""
-const ADMIN_PASSWORD_HASH = "b3b997b182d5501290e4ff8987be99054d957865ce9c1428d5ee1993264abf49";
+const ADMIN_PASSWORD_HASH = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9";
 
 // App Configuration
 const CONFIG = {
