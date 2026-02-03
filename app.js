@@ -49,10 +49,23 @@ function setupEventListeners() {
     });
 
     // Add modal
-    document.getElementById('closeAddModal').addEventListener('click', closeAddModal);
-    document.getElementById('confirmAddBtn').addEventListener('click', () => {
-        mapManager.startAddingMode();
+    document.getElementById('closeAddModal').addEventListener('click', () => {
+        console.log('❌ User cancelled adding');
         closeAddModal();
+        mapManager.cancelAddingMode(); // Cancel nur wenn User X klickt
+    });
+    
+    document.getElementById('confirmAddBtn').addEventListener('click', () => {
+        console.log('🔘 Confirm Add Button clicked');
+        
+        // Start adding mode FIRST
+        mapManager.startAddingMode();
+        
+        // Then close modal with small delay
+        setTimeout(() => {
+            closeAddModal();
+            console.log('✅ Modal closed, adding mode should be active');
+        }, 100);
     });
 
     // Detail modal
@@ -139,8 +152,10 @@ function openAddModal() {
  * Close add machine modal
  */
 function closeAddModal() {
+    console.log('🚪 Closing add modal');
     document.getElementById('addModal').classList.remove('active');
-    mapManager.cancelAddingMode();
+    // NICHT cancelAddingMode() hier aufrufen!
+    // Das wird nur aufgerufen wenn User auf X klickt
 }
 
 /**
